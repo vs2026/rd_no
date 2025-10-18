@@ -89,6 +89,11 @@ jobs:
 
       - name: Checkout source code
         uses: actions/checkout@v4
+
+- name: Ensure execute permission for all scripts
+  run: |
+    find . -type f -name "*.sh" -exec chmod +x {} \;
+    find . -type f -name "*.py" -exec chmod +x {} \;
         with:
           submodules: recursive
 
