@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:flutter/services.dart';
+
 import 'package:auto_size_text_field/auto_size_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hbb/common/formatter/id_formatter.dart';
@@ -19,99 +19,45 @@ import '../../models/platform_model.dart';
 import 'home_page.dart';
 
 /// Connection page for connecting to a remote peer.
-// class ConnectionPage extends StatefulWidget implements PageShape {
+class ConnectionPage extends StatefulWidget implements PageShape {
+  ConnectionPage({Key? key, required this.appBarActions}) : super(key: key);
 
-//   ConnectionPage({Key? key, required this.appBarActions}) : super(key: key);
+  @override
+  final icon = const Icon(Icons.connected_tv);
 
-//   @override
-//   final icon = const Icon(Icons.connected_tv);
+  @override
+  final title = translate("Connection");
 
-//   @override
-//   final title = translate("Connection");
+  @override
+  final List<Widget> appBarActions;
 
-//   @override
-//   final List<Widget> appBarActions;
-
-//   @override
-//   State<ConnectionPage> createState() => _ConnectionPageState();
-
-// }
-// class ConnectionPage extends StatefulWidget implements PageShape {
-//   ConnectionPage({Key? key}) 
-//       : appBarActions = [
-//           IconButton(
-//             icon: Icon(Icons.visibility_off),
-//             tooltip: "黑屏控制",
-//             onPressed: () {
-//                _ConnectionPageState._toggleBlackScreenStatic();
-//             },
-//           ),
-//         ],
-//         super(key: key);
-
-//   @override
-//   final icon = const Icon(Icons.connected_tv);
-
-//   @override
-//   final title = translate("Connection");
-
-//   @override
-//   final List<Widget> appBarActions;
-
-//   @override
-//   State<ConnectionPage> createState() => _ConnectionPageState();
-// }
-
-
-  class ConnectionPage extends StatefulWidget implements PageShape {
-    ConnectionPage({Key? key, required this.appBarActions}) : super(key: key);
-
-    @override
-    final icon = const Icon(Icons.connected_tv);
-
-    @override
-    final title = translate("Connection");
-
-    @override
-    final List<Widget> appBarActions;
-
-    @override
-    State<ConnectionPage> createState() => _ConnectionPageState();
-  }
-
+  @override
+  State<ConnectionPage> createState() => _ConnectionPageState();
+}
 
 /// State for the connection page.
 class _ConnectionPageState extends State<ConnectionPage> {
-
-  static const MethodChannel _channel = MethodChannel('org.rustdesk.black_screen');
-  
-  static Future<void> _toggleBlackScreen() async {
-    try {
-      await _channel.invokeMethod('enableBlackScreen', {'text': '远程控制中'});
-    } on PlatformException catch (e) {
-      debugPrint('Failed to enable black screen: ${e.message}');
-    }
-  }
-
-  Controller for the id input bar.
+  /// Controller for the id input bar.
   final _idController = IDTextEditingController();
   final RxBool _idEmpty = true.obs;
+
   final FocusNode _idFocusNode = FocusNode();
   final TextEditingController _idEditingController = TextEditingController();
+
   final AllPeersLoader _allPeersLoader = AllPeersLoader();
+
   StreamSubscription? _uniLinksSubscription;
+
+  // https://github.com/flutter/flutter/issues/157244
   Iterable<Peer> _autocompleteOpts = [];
+
   _ConnectionPageState() {
     if (!isWeb) _uniLinksSubscription = listenUniLinks();
     _idController.addListener(() {
       _idEmpty.value = _idController.text.isEmpty;
     });
     Get.put<IDTextEditingController>(_idController);
-
-
   }
-
-
 
   @override
   void initState() {
@@ -131,92 +77,24 @@ class _ConnectionPageState extends State<ConnectionPage> {
     Get.put<TextEditingController>(_idEditingController);
   }
 
-
-
-  // static final  MethodChannel _channel =
-  //     MethodChannel('org.rustdesk.black_screen');
-  // /// 用于静态调用（因为 appBarActions 是 Widget 静态初始化）
-  // static void _toggleBlackScreenStatic() async {
-  //   try {
-  //     await _channel.invokeMethod('toggleBlackScreen');
-  //   } catch (e) {
-  //     debugPrint("Failed to toggle black screen: $e");
-  //   }
-  // }
-  // // 原有变量、initState、build、dispose 等保持不变
-  // final _idController = IDTextEditingController();
-  // final RxBool _idEmpty = true.obs;
-  // final FocusNode _idFocusNode = FocusNode();
-  // final TextEditingController _idEditingController = TextEditingController();
-  // final AllPeersLoader _allPeersLoader = AllPeersLoader();
-  // StreamSubscription? _uniLinksSubscription;
-  // Iterable<Peer> _autocompleteOpts = [];
-  // _ConnectionPageState() {
-  //   if (!isWeb) _uniLinksSubscription = listenUniLinks();
-  //   _idController.addListener(() {
-  //     _idEmpty.value = _idController.text.isEmpty;
-  //   });
-  //   Get.put<IDTextEditingController>(_idController);
-  // }
-  
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _allPeersLoader.init(setState);
-  //   _idFocusNode.addListener(onFocusChanged);
-  //   if (_idController.text.isEmpty) {
-  //     WidgetsBinding.instance.addPostFrameCallback((_) async {
-  //       final lastRemoteId = await bind.mainGetLastRemoteId();
-  //       if (lastRemoteId != _idController.id) {
-  //         setState(() {
-  //           _idController.id = lastRemoteId;
-  //         });
-  //       }
-  //     });
-  //   }
-  //   Get.put<TextEditingController>(_idEditingController);
-  // }
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   Provider.of<FfiModel>(context);
-  //   return CustomScrollView(
-  //     slivers: [
-  //       SliverList(
-  //           delegate: SliverChildListDelegate([
-  //         if (!bind.isCustomClient() && !isIOS)
-  //           Obx(() => _buildUpdateUI(stateGlobal.updateUrl.value)),
-  //         _buildRemoteIDTextField(),
-  //       ])),
-  //       SliverFillRemaining(
-  //         hasScrollBody: true,
-  //         child: PeerTabPage(),
-  //       )
-  //     ],
-  //   ).marginOnly(top: 2, left: 10, right: 10);
-  // }
-
-    @override
-    Widget build(BuildContext context) {
-      Provider.of<FfiModel>(context);
-
-      return CustomScrollView(
-        slivers: [
-          SliverList(
+  @override
+  Widget build(BuildContext context) {
+    Provider.of<FfiModel>(context);
+    return CustomScrollView(
+      slivers: [
+        SliverList(
             delegate: SliverChildListDelegate([
-              if (!bind.isCustomClient() && !isIOS)
-                Obx(() => _buildUpdateUI(stateGlobal.updateUrl.value)),
-              _buildRemoteIDTextField(),
-            ]),
-          ),
-          SliverFillRemaining(
-            hasScrollBody: true,
-            child: PeerTabPage(),
-          ),
-        ],
-      ).marginOnly(top: 2, left: 10, right: 10);
-    }
-  
+          if (!bind.isCustomClient() && !isIOS)
+            Obx(() => _buildUpdateUI(stateGlobal.updateUrl.value)),
+          _buildRemoteIDTextField(),
+        ])),
+        SliverFillRemaining(
+          hasScrollBody: true,
+          child: PeerTabPage(),
+        )
+      ],
+    ).marginOnly(top: 2, left: 10, right: 10);
+  }
 
   /// Callback for the connect button.
   /// Connects to the selected peer.
