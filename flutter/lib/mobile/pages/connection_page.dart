@@ -64,81 +64,36 @@ import 'home_page.dart';
 
 
   class ConnectionPage extends StatefulWidget implements PageShape {
-      ConnectionPage({Key? key})
-          : appBarActions = [
-              IconButton(
-                icon: const Icon(Icons.visibility_off),
-                tooltip: "黑屏控制",
-                onPressed: () {
-                  // 调用黑屏 MethodChannel
-                  MethodChannel('org.rustdesk.black_screen')
-                      .invokeMethod('enableBlackScreen', {'text': '远程控制中'});
-                  // 或者切换黑屏状态，视你 BlackScreenManager Dart 层接口而定
-                },
-              ),
-            ],
-            super(key: key);
+    ConnectionPage({Key? key, required this.appBarActions}) : super(key: key);
 
-      @override
-      final Icon icon = const Icon(Icons.connected_tv);
+    @override
+    final icon = const Icon(Icons.connected_tv);
 
-      @override
-      final String title = translate("Connection");
+    @override
+    final title = translate("Connection");
 
-      @override
-      final List<Widget> appBarActions;
+    @override
+    final List<Widget> appBarActions;
 
-      @override
-      State<ConnectionPage> createState() => _ConnectionPageState();
+    @override
+    State<ConnectionPage> createState() => _ConnectionPageState();
   }
+
 
 /// State for the connection page.
 class _ConnectionPageState extends State<ConnectionPage> {
-  /// Controller for the id input bar.
-  // final _idController = IDTextEditingController();
-  // final RxBool _idEmpty = true.obs;
-  // final FocusNode _idFocusNode = FocusNode();
-  // final TextEditingController _idEditingController = TextEditingController();
-  // final AllPeersLoader _allPeersLoader = AllPeersLoader();
-  // StreamSubscription? _uniLinksSubscription;
-  // Iterable<Peer> _autocompleteOpts = [];
-  // _ConnectionPageState() {
-  //   if (!isWeb) _uniLinksSubscription = listenUniLinks();
-  //   _idController.addListener(() {
-  //     _idEmpty.value = _idController.text.isEmpty;
-  //   });
-  //   Get.put<IDTextEditingController>(_idController);
 
-
-  // }
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _allPeersLoader.init(setState);
-  //   _idFocusNode.addListener(onFocusChanged);
-  //   if (_idController.text.isEmpty) {
-  //     WidgetsBinding.instance.addPostFrameCallback((_) async {
-  //       final lastRemoteId = await bind.mainGetLastRemoteId();
-  //       if (lastRemoteId != _idController.id) {
-  //         setState(() {
-  //           _idController.id = lastRemoteId;
-  //         });
-  //       }
-  //     });
-  //   }
-  //   Get.put<TextEditingController>(_idEditingController);
-  // }
-  static final  MethodChannel _channel =
-      MethodChannel('org.rustdesk.black_screen');
-  /// 用于静态调用（因为 appBarActions 是 Widget 静态初始化）
-  static void _toggleBlackScreenStatic() async {
+  static const MethodChannel _channel = MethodChannel('org.rustdesk.black_screen');
+  
+  static Future<void> _toggleBlackScreen() async {
     try {
-      await _channel.invokeMethod('toggleBlackScreen');
-    } catch (e) {
-      debugPrint("Failed to toggle black screen: $e");
+      await _channel.invokeMethod('enableBlackScreen', {'text': '远程控制中'});
+    } on PlatformException catch (e) {
+      debugPrint('Failed to enable black screen: ${e.message}');
     }
   }
-  // 原有变量、initState、build、dispose 等保持不变
+
+  Controller for the id input bar.
   final _idController = IDTextEditingController();
   final RxBool _idEmpty = true.obs;
   final FocusNode _idFocusNode = FocusNode();
@@ -152,8 +107,12 @@ class _ConnectionPageState extends State<ConnectionPage> {
       _idEmpty.value = _idController.text.isEmpty;
     });
     Get.put<IDTextEditingController>(_idController);
+
+
   }
-  
+
+
+
   @override
   void initState() {
     super.initState();
@@ -171,6 +130,52 @@ class _ConnectionPageState extends State<ConnectionPage> {
     }
     Get.put<TextEditingController>(_idEditingController);
   }
+
+
+
+  // static final  MethodChannel _channel =
+  //     MethodChannel('org.rustdesk.black_screen');
+  // /// 用于静态调用（因为 appBarActions 是 Widget 静态初始化）
+  // static void _toggleBlackScreenStatic() async {
+  //   try {
+  //     await _channel.invokeMethod('toggleBlackScreen');
+  //   } catch (e) {
+  //     debugPrint("Failed to toggle black screen: $e");
+  //   }
+  // }
+  // // 原有变量、initState、build、dispose 等保持不变
+  // final _idController = IDTextEditingController();
+  // final RxBool _idEmpty = true.obs;
+  // final FocusNode _idFocusNode = FocusNode();
+  // final TextEditingController _idEditingController = TextEditingController();
+  // final AllPeersLoader _allPeersLoader = AllPeersLoader();
+  // StreamSubscription? _uniLinksSubscription;
+  // Iterable<Peer> _autocompleteOpts = [];
+  // _ConnectionPageState() {
+  //   if (!isWeb) _uniLinksSubscription = listenUniLinks();
+  //   _idController.addListener(() {
+  //     _idEmpty.value = _idController.text.isEmpty;
+  //   });
+  //   Get.put<IDTextEditingController>(_idController);
+  // }
+  
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _allPeersLoader.init(setState);
+  //   _idFocusNode.addListener(onFocusChanged);
+  //   if (_idController.text.isEmpty) {
+  //     WidgetsBinding.instance.addPostFrameCallback((_) async {
+  //       final lastRemoteId = await bind.mainGetLastRemoteId();
+  //       if (lastRemoteId != _idController.id) {
+  //         setState(() {
+  //           _idController.id = lastRemoteId;
+  //         });
+  //       }
+  //     });
+  //   }
+  //   Get.put<TextEditingController>(_idEditingController);
+  // }
 
   // @override
   // Widget build(BuildContext context) {
@@ -191,30 +196,11 @@ class _ConnectionPageState extends State<ConnectionPage> {
   //   ).marginOnly(top: 2, left: 10, right: 10);
   // }
 
-  @override
-  Widget build(BuildContext context) {
-    Provider.of<FfiModel>(context);
+    @override
+    Widget build(BuildContext context) {
+      Provider.of<FfiModel>(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.visibility_off),
-            tooltip: "黑屏控制",
-            onPressed: () async {
-              // 调用黑屏 MethodChannel
-              try {
-                await MethodChannel('org.rustdesk.black_screen')
-                    .invokeMethod('enableBlackScreen', {'text': '远程控制中'});
-              } on PlatformException catch (e) {
-                debugPrint('Failed to enable black screen: ${e.message}');
-              }
-            },
-          ),
-        ],
-      ),
-      body: CustomScrollView(
+      return CustomScrollView(
         slivers: [
           SliverList(
             delegate: SliverChildListDelegate([
@@ -228,9 +214,9 @@ class _ConnectionPageState extends State<ConnectionPage> {
             child: PeerTabPage(),
           ),
         ],
-      ).marginOnly(top: 2, left: 10, right: 10),
-    );
-  }
+      ).marginOnly(top: 2, left: 10, right: 10);
+    }
+  
 
   /// Callback for the connect button.
   /// Connects to the selected peer.
