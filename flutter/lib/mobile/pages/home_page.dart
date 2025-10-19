@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hbb/mobile/pages/server_page.dart';
 import 'package:flutter_hbb/mobile/pages/settings_page.dart';
 import 'package:flutter_hbb/web/settings_page.dart';
@@ -9,12 +10,14 @@ import '../../models/platform_model.dart';
 import '../../models/state_model.dart';
 import 'connection_page.dart';
 
+/// 页面基类定义
 abstract class PageShape extends Widget {
   final String title = "";
   final Widget icon = Icon(null);
   final List<Widget> appBarActions = [];
 }
 
+/// 主界面
 class HomePage extends StatefulWidget {
   static final homeKey = GlobalKey<HomePageState>();
 
@@ -25,19 +28,15 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  static const MethodChannel _channel = MethodChannel('org.rustdesk.black_screen');
+
   var _selectedIndex = 0;
   int get selectedIndex => _selectedIndex;
   final List<PageShape> _pages = [];
   int _chatPageTabIndex = -1;
   bool get isChatPageCurrentTab => isAndroid
       ? _selectedIndex == _chatPageTabIndex
-      : false; // change this when ios have chat page
-
-  void refreshPages() {
-    setState(() {
-      initPages();
-    });
-  }
+      : false;
 
   @override
   void initState() {
@@ -45,77 +44,85 @@ class HomePageState extends State<HomePage> {
     initPages();
   }
 
+  /// 黑屏控制按钮逻辑
+  static Future<void> _toggleBlackScreen() async {
+    try {
+      await _channel.invokeMethod('enableBlackScreen', {'text': '远程控制中'});
+    } on PlatformException catch (e) {
+      debugPrint('Failed to enable black screen: ${e.message}');
+    }
+  }
+
+  /// 初始化底部导航页
   void initPages() {
-    
     _pages.clear();
 
-    // if (!bind.isIncomingOnly()) {
-    //   _pages.add(ConnectionPage(
-    //     appBarActions: [],
-    //   ));
-    // }
+    // 主连接页面（添加黑屏按钮）
+    if (!bind.isIncomingOnly()) {
+      _pages.add(ConnectionPage(
+        appBarActions: [
+          IconButton(
+            icon: const Icon(Icons.visibility_off),
+            tooltip: "黑屏控制",
+            onPressed: _toggleBlackScreen,
+          ),
+        ],
+      ));
+    }
 
-    // if (isAndroid && !bind.isOutgoingOnly()) {
-    //   _chatPageTabIndex = _pages.length;
-    //   _pages.addAll([ChatPage(type: ChatPageType.mobileMain), ServerPage()]);
-    // }
-    //_pages.add(SettingsPage());
+    // Server 页面（共享屏幕）
+    _pages.add(ServerPage());
 
-     // Share screen 页面
-     _pages.add(ServerPage());
-     // Settings 页面
+    // 设置页面
     _pages.add(SettingsPage());
-
-
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-        onWillPop: () async {
-          if (_selectedIndex != 0) {
-            setState(() {
-              _selectedIndex = 0;
-            });
-          } else {
-            return true;
-          }
+      onWillPop: () async {
+        if (_selectedIndex != 0) {
+          setState(() {
+            _selectedIndex = 0;
+          });
           return false;
-        },
-        child: Scaffold(
-          // backgroundColor: MyTheme.grayBg,
-          appBar: AppBar(
-            centerTitle: true,
-            title: appTitle(),
-            actions: _pages.elementAt(_selectedIndex).appBarActions,
-          ),
-          bottomNavigationBar: BottomNavigationBar(
-            key: navigationBarKey,
-            items: _pages
-                .map((page) =>
-                    BottomNavigationBarItem(icon: page.icon, label: page.title))
-                .toList(),
-            currentIndex: _selectedIndex,
-            type: BottomNavigationBarType.fixed,
-            selectedItemColor: MyTheme.accent, //
-            unselectedItemColor: MyTheme.darkGray,
-            onTap: (index) => setState(() {
-              // close chat overlay when go chat page
-              if (_selectedIndex != index) {
-                _selectedIndex = index;
-                if (isChatPageCurrentTab) {
-                  gFFI.chatModel.hideChatIconOverlay();
-                  gFFI.chatModel.hideChatWindowOverlay();
-                  gFFI.chatModel.mobileClearClientUnread(
-                      gFFI.chatModel.currentKey.connId);
-                }
+        }
+        return true;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: appTitle(),
+          actions: _pages.elementAt(_selectedIndex).appBarActions,
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          key: navigationBarKey,
+          items: _pages
+              .map((page) => BottomNavigationBarItem(
+                  icon: page.icon, label: page.title))
+              .toList(),
+          currentIndex: _selectedIndex,
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: MyTheme.accent,
+          unselectedItemColor: MyTheme.darkGray,
+          onTap: (index) => setState(() {
+            if (_selectedIndex != index) {
+              _selectedIndex = index;
+              if (isChatPageCurrentTab) {
+                gFFI.chatModel.hideChatIconOverlay();
+                gFFI.chatModel.hideChatWindowOverlay();
+                gFFI.chatModel.mobileClearClientUnread(
+                    gFFI.chatModel.currentKey.connId);
               }
-            }),
-          ),
-          body: _pages.elementAt(_selectedIndex),
-        ));
+            }
+          }),
+        ),
+        body: _pages.elementAt(_selectedIndex),
+      ),
+    );
   }
 
+  /// 标题栏显示逻辑
   Widget appTitle() {
     final currentUser = gFFI.chatModel.currentUser;
     final currentKey = gFFI.chatModel.currentKey;
@@ -142,16 +149,15 @@ class HomePageState extends State<HomePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    "${currentUser.firstName}   ${currentUser.id}",
-                  ),
+                  Text("${currentUser.firstName}   ${currentUser.id}"),
                   if (connected)
                     Container(
                       width: 10,
                       height: 10,
-                      decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Color.fromARGB(255, 133, 246, 199)),
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color.fromARGB(255, 133, 246, 199),
+                      ),
                     ).marginSymmetric(horizontal: 2),
                 ],
               ),
@@ -164,16 +170,34 @@ class HomePageState extends State<HomePage> {
   }
 }
 
+/// Web 端主页
 class WebHomePage extends StatelessWidget {
-  final connectionPage =
-      ConnectionPage(appBarActions: <Widget>[const WebSettingsPage()]);
+  final connectionPage = ConnectionPage(
+    appBarActions: <Widget>[
+      const WebSettingsPage(),
+      IconButton(
+        icon: const Icon(Icons.visibility_off),
+        tooltip: "黑屏控制",
+        onPressed: _toggleBlackScreen,
+      ),
+    ],
+  );
+
+  static const MethodChannel _channel = MethodChannel('org.rustdesk.black_screen');
+
+  static Future<void> _toggleBlackScreen() async {
+    try {
+      await _channel.invokeMethod('enableBlackScreen', {'text': '远程控制中'});
+    } on PlatformException catch (e) {
+      debugPrint('Failed to enable black screen: ${e.message}');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     stateGlobal.isInMainPage = true;
     handleUnilink(context);
     return Scaffold(
-      // backgroundColor: MyTheme.grayBg,
       appBar: AppBar(
         centerTitle: true,
         title: Text("${bind.mainGetAppNameSync()} (Preview)"),
@@ -183,6 +207,7 @@ class WebHomePage extends StatelessWidget {
     );
   }
 
+  /// 处理 Web 链接跳转
   handleUnilink(BuildContext context) {
     if (webInitialLink.isEmpty) {
       return;
@@ -255,11 +280,14 @@ class WebHomePage extends StatelessWidget {
       }
     }
     if (id != null) {
-      connect(context, id, 
-        isFileTransfer: isFileTransfer, 
-        isViewCamera: isViewCamera, 
+      connect(
+        context,
+        id,
+        isFileTransfer: isFileTransfer,
+        isViewCamera: isViewCamera,
         isTerminal: isTerminal,
-        password: password);
+        password: password,
+      );
     }
   }
 }
