@@ -246,6 +246,8 @@ class MainService : Service() {
         FFI.startServer(configPath, "")
 
         createForegroundNotification()
+        // 🚫 防止启动悬浮窗服务
+        stopService(Intent(this, FloatingWindowService::class.java))
     }
 
     override fun onDestroy() {
