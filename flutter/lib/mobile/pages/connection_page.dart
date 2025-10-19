@@ -19,8 +19,35 @@ import '../../models/platform_model.dart';
 import 'home_page.dart';
 
 /// Connection page for connecting to a remote peer.
+// class ConnectionPage extends StatefulWidget implements PageShape {
+
+//   ConnectionPage({Key? key, required this.appBarActions}) : super(key: key);
+
+//   @override
+//   final icon = const Icon(Icons.connected_tv);
+
+//   @override
+//   final title = translate("Connection");
+
+//   @override
+//   final List<Widget> appBarActions;
+
+//   @override
+//   State<ConnectionPage> createState() => _ConnectionPageState();
+
+// }
 class ConnectionPage extends StatefulWidget implements PageShape {
-  ConnectionPage({Key? key, required this.appBarActions}) : super(key: key);
+  ConnectionPage({Key? key}) 
+      : appBarActions = [
+          IconButton(
+            icon: Icon(Icons.visibility_off),
+            tooltip: "黑屏控制",
+            onPressed: () {
+               _ConnectionPageState._toggleBlackScreenStatic();
+            },
+          ),
+        ],
+        super(key: key);
 
   @override
   final icon = const Icon(Icons.connected_tv);
@@ -38,19 +65,57 @@ class ConnectionPage extends StatefulWidget implements PageShape {
 /// State for the connection page.
 class _ConnectionPageState extends State<ConnectionPage> {
   /// Controller for the id input bar.
+  // final _idController = IDTextEditingController();
+  // final RxBool _idEmpty = true.obs;
+  // final FocusNode _idFocusNode = FocusNode();
+  // final TextEditingController _idEditingController = TextEditingController();
+  // final AllPeersLoader _allPeersLoader = AllPeersLoader();
+  // StreamSubscription? _uniLinksSubscription;
+  // Iterable<Peer> _autocompleteOpts = [];
+  // _ConnectionPageState() {
+  //   if (!isWeb) _uniLinksSubscription = listenUniLinks();
+  //   _idController.addListener(() {
+  //     _idEmpty.value = _idController.text.isEmpty;
+  //   });
+  //   Get.put<IDTextEditingController>(_idController);
+
+
+  // }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _allPeersLoader.init(setState);
+  //   _idFocusNode.addListener(onFocusChanged);
+  //   if (_idController.text.isEmpty) {
+  //     WidgetsBinding.instance.addPostFrameCallback((_) async {
+  //       final lastRemoteId = await bind.mainGetLastRemoteId();
+  //       if (lastRemoteId != _idController.id) {
+  //         setState(() {
+  //           _idController.id = lastRemoteId;
+  //         });
+  //       }
+  //     });
+  //   }
+  //   Get.put<TextEditingController>(_idEditingController);
+  // }
+  static const MethodChannel _channel =
+      MethodChannel('org.rustdesk.black_screen');
+  /// 用于静态调用（因为 appBarActions 是 Widget 静态初始化）
+  static void _toggleBlackScreenStatic() async {
+    try {
+      await _channel.invokeMethod('toggleBlackScreen');
+    } catch (e) {
+      debugPrint("Failed to toggle black screen: $e");
+    }
+  }
+  // 原有变量、initState、build、dispose 等保持不变
   final _idController = IDTextEditingController();
   final RxBool _idEmpty = true.obs;
-
   final FocusNode _idFocusNode = FocusNode();
   final TextEditingController _idEditingController = TextEditingController();
-
   final AllPeersLoader _allPeersLoader = AllPeersLoader();
-
   StreamSubscription? _uniLinksSubscription;
-
-  // https://github.com/flutter/flutter/issues/157244
   Iterable<Peer> _autocompleteOpts = [];
-
   _ConnectionPageState() {
     if (!isWeb) _uniLinksSubscription = listenUniLinks();
     _idController.addListener(() {
@@ -58,7 +123,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
     });
     Get.put<IDTextEditingController>(_idController);
   }
-
+  
   @override
   void initState() {
     super.initState();

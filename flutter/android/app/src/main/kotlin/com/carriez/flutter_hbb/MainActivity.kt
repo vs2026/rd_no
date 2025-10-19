@@ -33,6 +33,7 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 import kotlin.concurrent.thread
+import com.carriez.flutter_hbb.BlackScreenManager
 
 
 class MainActivity : FlutterActivity() {
@@ -51,7 +52,9 @@ class MainActivity : FlutterActivity() {
     private val audioRecordHandle = AudioRecordHandle(this, { false }, { isAudioStart })
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+
         super.configureFlutterEngine(flutterEngine)
+        
         if (MainService.isReady) {
             Intent(activity, MainService::class.java).also {
                 bindService(it, serviceConnection, Context.BIND_AUTO_CREATE)
@@ -62,8 +65,24 @@ class MainActivity : FlutterActivity() {
             channelTag
         )
         initFlutterChannel(flutterMethodChannel!!)
+
+        // 初始化黑屏管理器
+        val blackScreenManager = BlackScreenManager(this)
+        // 新增黑屏控制的 Flutter MethodChannel
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "org.rustdesk.black_screen")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "toggleBlackScreen" -> {
+                        BlackScreenManager.toggle(this)
+                        result.success(true)
+                    }
+                    else -> result.notImplemented()
+                }
+        }
+
         thread { setCodecInfo() }
     }
+
 
     override fun onResume() {
         super.onResume()
