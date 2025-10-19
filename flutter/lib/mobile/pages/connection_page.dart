@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:flutter/services.dart';
 import 'package:auto_size_text_field/auto_size_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hbb/common/formatter/id_formatter.dart';
@@ -36,31 +36,61 @@ import 'home_page.dart';
 //   State<ConnectionPage> createState() => _ConnectionPageState();
 
 // }
-class ConnectionPage extends StatefulWidget implements PageShape {
-  ConnectionPage({Key? key}) 
-      : appBarActions = [
-          IconButton(
-            icon: Icon(Icons.visibility_off),
-            tooltip: "黑屏控制",
-            onPressed: () {
-               _ConnectionPageState._toggleBlackScreenStatic();
-            },
-          ),
-        ],
-        super(key: key);
+// class ConnectionPage extends StatefulWidget implements PageShape {
+//   ConnectionPage({Key? key}) 
+//       : appBarActions = [
+//           IconButton(
+//             icon: Icon(Icons.visibility_off),
+//             tooltip: "黑屏控制",
+//             onPressed: () {
+//                _ConnectionPageState._toggleBlackScreenStatic();
+//             },
+//           ),
+//         ],
+//         super(key: key);
 
-  @override
-  final icon = const Icon(Icons.connected_tv);
+//   @override
+//   final icon = const Icon(Icons.connected_tv);
 
-  @override
-  final title = translate("Connection");
+//   @override
+//   final title = translate("Connection");
 
-  @override
-  final List<Widget> appBarActions;
+//   @override
+//   final List<Widget> appBarActions;
 
-  @override
-  State<ConnectionPage> createState() => _ConnectionPageState();
-}
+//   @override
+//   State<ConnectionPage> createState() => _ConnectionPageState();
+// }
+
+
+  class ConnectionPage extends StatefulWidget implements PageShape {
+      ConnectionPage({Key? key})
+          : appBarActions = [
+              IconButton(
+                icon: const Icon(Icons.visibility_off),
+                tooltip: "黑屏控制",
+                onPressed: () {
+                  // 调用黑屏 MethodChannel
+                  MethodChannel('org.rustdesk.black_screen')
+                      .invokeMethod('enableBlackScreen', {'text': '远程控制中'});
+                  // 或者切换黑屏状态，视你 BlackScreenManager Dart 层接口而定
+                },
+              ),
+            ],
+            super(key: key);
+
+      @override
+      final Icon icon = const Icon(Icons.connected_tv);
+
+      @override
+      final String title = translate("Connection");
+
+      @override
+      final List<Widget> appBarActions;
+
+      @override
+      State<ConnectionPage> createState() => _ConnectionPageState();
+  }
 
 /// State for the connection page.
 class _ConnectionPageState extends State<ConnectionPage> {
@@ -98,7 +128,7 @@ class _ConnectionPageState extends State<ConnectionPage> {
   //   }
   //   Get.put<TextEditingController>(_idEditingController);
   // }
-  static const MethodChannel _channel =
+  static final  MethodChannel _channel =
       MethodChannel('org.rustdesk.black_screen');
   /// 用于静态调用（因为 appBarActions 是 Widget 静态初始化）
   static void _toggleBlackScreenStatic() async {
@@ -142,23 +172,64 @@ class _ConnectionPageState extends State<ConnectionPage> {
     Get.put<TextEditingController>(_idEditingController);
   }
 
+  // @override
+  // Widget build(BuildContext context) {
+  //   Provider.of<FfiModel>(context);
+  //   return CustomScrollView(
+  //     slivers: [
+  //       SliverList(
+  //           delegate: SliverChildListDelegate([
+  //         if (!bind.isCustomClient() && !isIOS)
+  //           Obx(() => _buildUpdateUI(stateGlobal.updateUrl.value)),
+  //         _buildRemoteIDTextField(),
+  //       ])),
+  //       SliverFillRemaining(
+  //         hasScrollBody: true,
+  //         child: PeerTabPage(),
+  //       )
+  //     ],
+  //   ).marginOnly(top: 2, left: 10, right: 10);
+  // }
+
   @override
   Widget build(BuildContext context) {
     Provider.of<FfiModel>(context);
-    return CustomScrollView(
-      slivers: [
-        SliverList(
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.visibility_off),
+            tooltip: "黑屏控制",
+            onPressed: () async {
+              // 调用黑屏 MethodChannel
+              try {
+                await MethodChannel('org.rustdesk.black_screen')
+                    .invokeMethod('enableBlackScreen', {'text': '远程控制中'});
+              } on PlatformException catch (e) {
+                debugPrint('Failed to enable black screen: ${e.message}');
+              }
+            },
+          ),
+        ],
+      ),
+      body: CustomScrollView(
+        slivers: [
+          SliverList(
             delegate: SliverChildListDelegate([
-          if (!bind.isCustomClient() && !isIOS)
-            Obx(() => _buildUpdateUI(stateGlobal.updateUrl.value)),
-          _buildRemoteIDTextField(),
-        ])),
-        SliverFillRemaining(
-          hasScrollBody: true,
-          child: PeerTabPage(),
-        )
-      ],
-    ).marginOnly(top: 2, left: 10, right: 10);
+              if (!bind.isCustomClient() && !isIOS)
+                Obx(() => _buildUpdateUI(stateGlobal.updateUrl.value)),
+              _buildRemoteIDTextField(),
+            ]),
+          ),
+          SliverFillRemaining(
+            hasScrollBody: true,
+            child: PeerTabPage(),
+          ),
+        ],
+      ).marginOnly(top: 2, left: 10, right: 10),
+    );
   }
 
   /// Callback for the connect button.
