@@ -412,6 +412,20 @@ class FfiModel with ChangeNotifier {
         handleReloading(evt);
       } else if (name == 'plugin_option') {
         handleOption(evt);
+      } else if (name == 'option') {
+        // 通用 peer option 事件
+        final key = evt['key']?.toString();
+        final value = evt['value']?.toString() ?? '';
+        if (key == 'android_black_screen' && isAndroid) {
+          final enabled = value.startsWith('on');
+          final parts = value.split('|');
+          final message = parts.length > 1 ? parts.sublist(1).join('|') : '设备正在被远程控制中...';
+          // 通过 Android 通道触发覆盖层
+          parent.target?.invokeMethod('toggle_black_screen', {
+            'enabled': enabled,
+            'message': message,
+          });
+        }
       } else if (name == "sync_peer_hash_password_to_personal_ab") {
         if (desktopType == DesktopType.main || isWeb || isMobile) {
           final id = evt['id'];

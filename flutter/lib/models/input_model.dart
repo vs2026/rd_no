@@ -1555,11 +1555,18 @@ class InputModel {
   void toggleBlackScreen() {
     _isBlackScreenEnabled.value = !_isBlackScreenEnabled.value;
     if (parent.target?.ffiModel.isPeerAndroid == true) {
-      // Send command to Android device to show/hide black screen overlay
-      parent.target?.invokeMethod("toggle_black_screen", {
-        "enabled": _isBlackScreenEnabled.value,
-        "message": "设备正在被远程控制中..."
-      });
+      // 通过会话发送到对端（安卓）
+      try {
+        bind.sessionPeerOption(
+          sessionId: sessionId,
+          name: 'android_black_screen',
+          value: _isBlackScreenEnabled.value
+              ? 'on|设备正在被远程控制中...'
+              : 'off',
+        );
+      } catch (e) {
+        debugPrint('toggleBlackScreen send peer option failed: $e');
+      }
     }
   }
 }
