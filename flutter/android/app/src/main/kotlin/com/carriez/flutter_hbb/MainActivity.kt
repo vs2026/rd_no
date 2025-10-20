@@ -210,24 +210,6 @@ class MainActivity : FlutterActivity() {
                         result.success(true)
                     }
                 }
-                "toggle_blackout" -> {
-                    val intent = Intent(context, BlackoutOverlayService::class.java)
-                    if (BlackoutOverlayService.isRunning) {
-                        context.stopService(intent)
-                        Companion.flutterMethodChannel?.invokeMethod(
-                            "on_state_changed",
-                            mapOf("name" to "blackout", "value" to "false")
-                        )
-                        result.success(true)
-                    } else {
-                        context.startService(intent)
-                        Companion.flutterMethodChannel?.invokeMethod(
-                            "on_state_changed",
-                            mapOf("name" to "blackout", "value" to "true")
-                        )
-                        result.success(true)
-                    }
-                }
                 "enable_soft_keyboard" -> {
                     // https://blog.csdn.net/hanye2020/article/details/105553780
                     if (call.arguments as Boolean) {

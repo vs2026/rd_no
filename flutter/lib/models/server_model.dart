@@ -31,7 +31,6 @@ class ServerModel with ChangeNotifier {
   bool _audioOk = false;
   bool _fileOk = false;
   bool _clipboardOk = false;
-  bool _blackoutOn = false;
   bool _showElevation = false;
   bool hideCm = false;
   int _connectStatus = 0; // Rendezvous Server status
@@ -63,8 +62,6 @@ class ServerModel with ChangeNotifier {
   bool get fileOk => _fileOk;
 
   bool get clipboardOk => _clipboardOk;
-
-  bool get blackoutOn => _blackoutOn;
 
   bool get showElevation => _showElevation;
 
@@ -510,9 +507,6 @@ class ServerModel with ChangeNotifier {
               value: value ? defaultOptionYes : 'N');
         }
         _inputOk = value;
-        break;
-      case "blackout":
-        _blackoutOn = value;
         break;
       default:
         return;

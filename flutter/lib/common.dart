@@ -14,7 +14,6 @@ import 'package:flutter_hbb/desktop/widgets/tabbar_widget.dart';
 import 'package:flutter_hbb/main.dart';
 import 'package:flutter_hbb/models/peer_model.dart';
 import 'package:flutter_hbb/models/peer_tab_model.dart';
-import 'package:flutter_hbb/models/server_model.dart';
 import 'package:flutter_hbb/models/state_model.dart';
 import 'package:flutter_hbb/utils/multi_window_manager.dart';
 import 'package:flutter_hbb/utils/platform_channel.dart';
@@ -997,32 +996,16 @@ makeMobileActionsOverlayEntry(VoidCallback? onHide, {FFI? ffi}) {
       onBackPressed: session.inputModel.onMobileBack,
       onHomePressed: session.inputModel.onMobileHome,
       onRecentPressed: session.inputModel.onMobileApps,
-      onBlackoutPressed: () async {
-        // 由控制端下发到对端（Android）执行
-        await bind.sessionPeerOption(
-          sessionId: session.sessionId,
-          name: 'toggle_blackout',
-          value: 'Y',
-        );
-      },
       onHidePressed: onHide,
     );
   }
 
   return OverlayEntry(builder: (context) {
-    Widget buildInner(double scale) {
-      final session = ffi ?? gFFI;
-      return Consumer<ServerModel>(
-          builder: (context, serverModel, child) {
-            // rebuild to reflect serverModel.blackoutOn if needed in the future
-            return makeMobileActions(context, scale);
-          });
-    }
     if (isDesktop) {
       final c = Provider.of<CanvasModel>(context);
-      return buildInner(c.scale * 2.0);
+      return makeMobileActions(context, c.scale * 2.0);
     } else {
-      return buildInner(1.0);
+      return makeMobileActions(globalKey.currentContext!, 1.0);
     }
   });
 }
