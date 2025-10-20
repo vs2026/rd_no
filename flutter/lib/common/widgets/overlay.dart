@@ -12,6 +12,74 @@ import '../../models/chat_model.dart';
 import '../../models/model.dart';
 import 'chat_page.dart';
 
+// 自定义隐私模式覆盖层状态管理
+class CustomPrivacyOverlayState {
+  static final Map<String, bool> _privacyOverlayStates = {};
+  
+  static bool isPrivacyOverlayActive(String sessionId) {
+    return _privacyOverlayStates[sessionId] ?? false;
+  }
+  
+  static void setPrivacyOverlayState(String sessionId, bool isActive) {
+    _privacyOverlayStates[sessionId] = isActive;
+  }
+}
+
+// 自定义隐私模式覆盖层组件
+class CustomPrivacyOverlay extends StatelessWidget {
+  final String sessionId;
+
+  const CustomPrivacyOverlay({Key? key, required this.sessionId}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black,   //如果想要半透明 color: Colors.black87,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.privacy_tip,
+              size: 64,
+              color: Colors.white,
+            ),
+            SizedBox(height: 16),
+            Text(
+              translate('Remote Desktop is in Privacy Mode'),
+              style: TextStyle(
+                fontSize: 20,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 8),
+            Text(
+              translate('The screen content is being protected'),
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white70,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 20),
+            Text(
+              translate('Only the operator can turn off privacy mode'),
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white54,
+                fontStyle: FontStyle.italic,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class DraggableChatWindow extends StatelessWidget {
   const DraggableChatWindow(
       {Key? key,
@@ -175,6 +243,7 @@ class DraggableMobileActions extends StatelessWidget {
       this.onRecentPressed,
       this.onHomePressed,
       this.onHidePressed,
+      this.onNewButtonPressed, // 新增按钮的回调函数
       required this.position,
       required this.width,
       required this.height,
@@ -188,6 +257,7 @@ class DraggableMobileActions extends StatelessWidget {
   final VoidCallback? onHomePressed;
   final VoidCallback? onRecentPressed;
   final VoidCallback? onHidePressed;
+  final VoidCallback? onNewButtonPressed; // 新增按钮的回调函数定义
 
   @override
   Widget build(BuildContext context) {
@@ -233,6 +303,13 @@ class DraggableMobileActions extends StatelessWidget {
                           indent: 10,
                           endIndent: 10,
                         ),
+                        // 添加的新按钮
+                        IconButton(
+                            color: Colors.white,
+                            onPressed: onNewButtonPressed,
+                            splashRadius: kDesktopIconButtonSplashRadius,
+                            icon: const Icon(Icons.settings),
+                            iconSize: 24 * scale),
                         IconButton(
                             color: Colors.white,
                             onPressed: onHidePressed,
@@ -660,5 +737,162 @@ class BlockableOverlay extends StatelessWidget {
 
     /// set key
     return Overlay(key: state.key, initialEntries: initialEntries);
+  }
+}
+
+class OverlayDialogManager {
+  static const String kMobileActions = 'mobile_actions';
+  static const String kChatWindow = 'chat_window';
+  static const String kCustomPrivacyOverlay = 'custom_privacy_overlay';
+
+  final _dialogs = <String, OverlayEntry>{};
+  final _dismissListeners = <String, List<Function>>{};
+
+  final mobileActionsOverlayVisible = false.obs;
+  final chatWindowOverlayVisible = false.obs;
+  final customPrivacyOverlayVisible = false.obs;
+
+  late final OverlayState? overlay;
+
+  OverlayDialogManager() {
+    mobileActionsOverlayVisible.stream.listen((visible) {
+      if (visible) {
+        showMobileActionsOverlay();
+      } else {
+        hideMobileActionsOverlay();
+      }
+    });
+
+    chatWindowOverlayVisible.stream.listen((visible) {
+      if (visible) {
+        showChatWindowOverlay();
+      } else {
+        hideChatWindowOverlay();
+      }
+    });
+    
+    customPrivacyOverlayVisible.stream.listen((visible) {
+      if (visible) {
+        showCustomPrivacyOverlay();
+      } else {
+        hideCustomPrivacyOverlay();
+      }
+    });
+  }
+
+  void toggleMobileActionsOverlay() {
+    if (_dialogs.containsKey(kMobileActions)) {
+      hideMobileActionsOverlay();
+    } else {
+      showMobileActionsOverlay();
+    }
+  }
+
+  void showMobileActionsOverlay() {
+    if (!_dialogs.containsKey(kMobileActions)) {
+      final overlayEntry = _makeMobileActionsOverlayEntry();
+      overlay?.insert(overlayEntry);
+      _dialogs[kMobileActions] = overlayEntry;
+      mobileActionsOverlayVisible.value = true;
+    }
+  }
+
+  void hideMobileActionsOverlay() {
+    _dialogs[kMobileActions]?.remove();
+    _dialogs.remove(kMobileActions);
+    mobileActionsOverlayVisible.value = false;
+  }
+
+  OverlayEntry _makeMobileActionsOverlayEntry() {
+    return OverlayEntry(
+      builder: (context) => DraggableMobileActions(
+        scale: 1,
+        position: draggablePositions.mobileActions,
+        width: 100,
+        height: 100,
+        onHomePressed: () => hideMobileActionsOverlay(),
+        onHidePressed: () => hideMobileActionsOverlay(),
+      ),
+    );
+  }
+
+  void toggleChatWindowOverlay() {
+    if (_dialogs.containsKey(kChatWindow)) {
+      hideChatWindowOverlay();
+    } else {
+      showChatWindowOverlay();
+    }
+  }
+
+  void showChatWindowOverlay() {
+    if (!_dialogs.containsKey(kChatWindow)) {
+      final overlayEntry = _makeChatWindowOverlayEntry();
+      overlay?.insert(overlayEntry);
+      _dialogs[kChatWindow] = overlayEntry;
+      chatWindowOverlayVisible.value = true;
+    }
+  }
+
+  void hideChatWindowOverlay() {
+    _dialogs[kChatWindow]?.remove();
+    _dialogs.remove(kChatWindow);
+    chatWindowOverlayVisible.value = false;
+  }
+
+  OverlayEntry _makeChatWindowOverlayEntry() {
+    return OverlayEntry(
+      builder: (context) => DraggableChatWindow(
+        position: draggablePositions.chatWindow,
+        width: 300,
+        height: 400,
+        chatModel: gFFI.chatModel,
+      ),
+    );
+  }
+
+  void toggleCustomPrivacyOverlay() {
+    if (_dialogs.containsKey(kCustomPrivacyOverlay)) {
+      hideCustomPrivacyOverlay();
+    } else {
+      showCustomPrivacyOverlay();
+    }
+  }
+
+  void showCustomPrivacyOverlay() {
+    if (!_dialogs.containsKey(kCustomPrivacyOverlay)) {
+      final overlayEntry = _makeCustomPrivacyOverlayEntry();
+      overlay?.insert(overlayEntry);
+      _dialogs[kCustomPrivacyOverlay] = overlayEntry;
+      customPrivacyOverlayVisible.value = true;
+    }
+  }
+
+  void hideCustomPrivacyOverlay() {
+    _dialogs[kCustomPrivacyOverlay]?.remove();
+    _dialogs.remove(kCustomPrivacyOverlay);
+    customPrivacyOverlayVisible.value = false;
+  }
+
+  OverlayEntry _makeCustomPrivacyOverlayEntry() {
+    return OverlayEntry(
+      builder: (context) => CustomPrivacyOverlay(
+        sessionId: gFFI.sessionId,
+      ),
+    );
+  }
+
+  void addDismissListener(String key, Function listener) {
+    _dismissListeners[key] = _dismissListeners[key] ?? [];
+    _dismissListeners[key]!.add(listener);
+  }
+
+  void removeDismissListener(String key, Function listener) {
+    _dismissListeners[key]?.remove(listener);
+  }
+
+  void dismiss(String key) {
+    _dialogs[key]?.remove();
+    _dialogs.remove(key);
+    _dismissListeners[key]?.forEach((listener) => listener());
   }
 }
