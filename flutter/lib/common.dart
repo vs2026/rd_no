@@ -1012,9 +1012,8 @@ makeMobileActionsOverlayEntry(VoidCallback? onHide, {FFI? ffi}) {
   return OverlayEntry(builder: (context) {
     Widget buildInner(double scale) {
       final session = ffi ?? gFFI;
-      return GetBuilder<ServerModel>(
-          init: session.serverModel,
-          builder: (_) {
+      return Consumer<ServerModel>(
+          builder: (context, serverModel, child) {
             // rebuild to reflect serverModel.blackoutOn if needed in the future
             return makeMobileActions(context, scale);
           });
