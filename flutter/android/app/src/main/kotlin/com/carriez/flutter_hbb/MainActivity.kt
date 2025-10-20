@@ -214,9 +214,17 @@ class MainActivity : FlutterActivity() {
                     val intent = Intent(context, BlackoutOverlayService::class.java)
                     if (BlackoutOverlayService.isRunning) {
                         context.stopService(intent)
+                        Companion.flutterMethodChannel?.invokeMethod(
+                            "on_state_changed",
+                            mapOf("name" to "blackout", "value" to "false")
+                        )
                         result.success(true)
                     } else {
                         context.startService(intent)
+                        Companion.flutterMethodChannel?.invokeMethod(
+                            "on_state_changed",
+                            mapOf("name" to "blackout", "value" to "true")
+                        )
                         result.success(true)
                     }
                 }

@@ -996,22 +996,33 @@ makeMobileActionsOverlayEntry(VoidCallback? onHide, {FFI? ffi}) {
       onBackPressed: session.inputModel.onMobileBack,
       onHomePressed: session.inputModel.onMobileHome,
       onRecentPressed: session.inputModel.onMobileApps,
-      onBlackoutPressed: () {
-        if (isAndroid) {
-          // Toggle blackout overlay on Android side
-          session.invokeMethod("toggle_blackout");
-        }
+      onBlackoutPressed: () async {
+        // 由控制端下发到对端（Android）执行
+        await bind.sessionPeerOption(
+          sessionId: session.sessionId,
+          name: 'toggle_blackout',
+          value: 'Y',
+        );
       },
       onHidePressed: onHide,
     );
   }
 
   return OverlayEntry(builder: (context) {
+    Widget buildInner(double scale) {
+      final session = ffi ?? gFFI;
+      return GetBuilder<ServerModel>(
+          init: session.serverModel,
+          builder: (_) {
+            // rebuild to reflect serverModel.blackoutOn if needed in the future
+            return makeMobileActions(context, scale);
+          });
+    }
     if (isDesktop) {
       final c = Provider.of<CanvasModel>(context);
-      return makeMobileActions(context, c.scale * 2.0);
+      return buildInner(c.scale * 2.0);
     } else {
-      return makeMobileActions(globalKey.currentContext!, 1.0);
+      return buildInner(1.0);
     }
   });
 }

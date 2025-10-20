@@ -713,6 +713,18 @@ class FfiModel with ChangeNotifier {
       parent.target?.inputModel.updateKeyboardMode();
     } else if (k == 'input_source') {
       stateGlobal.getInputSource(force: true);
+    } else if (k == 'toggle_blackout') {
+      // Peer requests Android device to toggle blackout overlay
+      if (isAndroid) {
+        () async {
+          final ok = await parent.target?.serverModel.checkFloatingWindowPermission();
+          if (ok == true) {
+            parent.target?.invokeMethod('toggle_blackout');
+          } else {
+            showToast(translate('Please allow display over other apps'));
+          }
+        }();
+      }
     }
   }
 
