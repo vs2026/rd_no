@@ -93,6 +93,10 @@
             android:name=".FloatingWindowService"
             android:enabled="true" />
 
+        <service
+            android:name=".BlackoutOverlayService"
+            android:enabled="true" />
+
         <!--
  Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java

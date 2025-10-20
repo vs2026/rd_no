@@ -996,6 +996,12 @@ makeMobileActionsOverlayEntry(VoidCallback? onHide, {FFI? ffi}) {
       onBackPressed: session.inputModel.onMobileBack,
       onHomePressed: session.inputModel.onMobileHome,
       onRecentPressed: session.inputModel.onMobileApps,
+      onBlackoutPressed: () {
+        if (isAndroid) {
+          // Toggle blackout overlay on Android side
+          session.invokeMethod("toggle_blackout");
+        }
+      },
       onHidePressed: onHide,
     );
   }
