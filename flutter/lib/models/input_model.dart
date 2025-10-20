@@ -1548,6 +1548,8 @@ class InputModel {
 
   // Black screen functionality
   final RxBool _isBlackScreenEnabled = false.obs;
+  // 暴露用于 Obx 监听的 RxBool
+  RxBool get isBlackScreenEnabledRx => _isBlackScreenEnabled;
   bool get isBlackScreenEnabled => _isBlackScreenEnabled.value;
 
   void toggleBlackScreen() {

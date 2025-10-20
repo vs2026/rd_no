@@ -610,6 +610,7 @@ class _MobileActionMenu extends StatelessWidget {
   }
 }
 
+
 class _BlackScreenButton extends StatelessWidget {
   final FFI ffi;
   const _BlackScreenButton({Key? key, required this.ffi}) : super(key: key);
@@ -617,13 +618,13 @@ class _BlackScreenButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() => _IconMenuButton(
-          icon: Icons.screen_lock_portrait,
+          icon: Icon(Icons.screen_lock_portrait),
           tooltip: 'Black Screen',
           onPressed: () => ffi.inputModel.toggleBlackScreen(),
-          color: ffi.inputModel.isBlackScreenEnabled.isTrue
+          color: ffi.inputModel.isBlackScreenEnabledRx.value
               ? _ToolbarTheme.redColor
               : _ToolbarTheme.inactiveColor,
-          hoverColor: ffi.inputModel.isBlackScreenEnabled.isTrue
+          hoverColor: ffi.inputModel.isBlackScreenEnabledRx.value
               ? _ToolbarTheme.hoverRedColor
               : _ToolbarTheme.hoverInactiveColor,
         ));
