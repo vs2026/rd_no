@@ -997,29 +997,6 @@ makeMobileActionsOverlayEntry(VoidCallback? onHide, {FFI? ffi}) {
       onHomePressed: session.inputModel.onMobileHome,
       onRecentPressed: session.inputModel.onMobileApps,
       onHidePressed: onHide,
-      onNewButtonPressed: () {
-        // 切换隐私模式（黑屏模式）
-        // 检查是否支持隐私模式
-        final privacyModeSupported = session.ffiModel.pi.features.privacyMode;
-        if (privacyModeSupported) {
-          // 获取当前隐私模式状态
-          final privacyModeState = PrivacyModeState.find(session.sessionId.toString());
-          final isPrivacyModeOn = privacyModeState.value.isNotEmpty;
-          
-          // 切换隐私模式
-          bind.sessionTogglePrivacyMode(
-              sessionId: session.sessionId, 
-              implKey: "privacy_mode_impl_mag", 
-              on: !isPrivacyModeOn);
-        } else {
-          // 对于Android端，使用自定义覆盖层实现隐私模式功能
-          if (session.ffiModel.isPeerAndroid) {
-            session.dialogManager.toggleCustomPrivacyOverlay();
-          } else {
-            showToast(translate("Privacy mode is not supported on this device"));
-          }
-        }
-      },
     );
   }
 
@@ -1032,6 +1009,7 @@ makeMobileActionsOverlayEntry(VoidCallback? onHide, {FFI? ffi}) {
     }
   });
 }
+
 void showToast(String text, {Duration timeout = const Duration(seconds: 3)}) {
   final overlayState = globalKey.currentState?.overlay;
   if (overlayState == null) return;

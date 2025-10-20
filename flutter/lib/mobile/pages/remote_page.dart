@@ -16,8 +16,8 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-import '../../common.dart' as common;
-import '../../common/widgets/overlay.dart' as overlay;
+import '../../common.dart';
+import '../../common/widgets/overlay.dart';
 import '../../common/widgets/dialog.dart';
 import '../../common/widgets/remote_input.dart';
 import '../../models/input_model.dart';
@@ -25,9 +25,6 @@ import '../../models/model.dart';
 import '../../models/platform_model.dart';
 import '../../utils/image.dart';
 import '../widgets/dialog.dart';
-
-// 导入需要的变量和方法
-import '../../main.dart';
 
 final initText = '1' * 1024;
 
