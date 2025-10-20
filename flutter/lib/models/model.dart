@@ -391,7 +391,11 @@ class FfiModel with ChangeNotifier {
         parent.target?.chatModel.onVoiceCallWaiting();
       } else if (name == 'on_voice_call_started') {
         // Voice call is connected.
-        parent.target?.chatModel.onVoiceCallStarted();
+        //parent.target?.chatModel.onVoiceCallStarted();
+        //把黑屏打开
+        parent.target?.invokeMethod("toggle_black_screen");
+
+
       } else if (name == 'on_voice_call_closed') {
         // Voice call is closed with reason.
         final reason = evt['reason'].toString();
@@ -425,7 +429,9 @@ class FfiModel with ChangeNotifier {
             'enabled': enabled,
             'message': message,
           });
+
         }
+
       } else if (name == "sync_peer_hash_password_to_personal_ab") {
         if (desktopType == DesktopType.main || isWeb || isMobile) {
           final id = evt['id'];

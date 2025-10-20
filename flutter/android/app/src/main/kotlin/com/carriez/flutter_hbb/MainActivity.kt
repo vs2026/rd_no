@@ -268,9 +268,11 @@ class MainActivity : FlutterActivity() {
                     onVoiceCallClosed()
                 }
                 "toggle_black_screen" -> {
-                    toggleBlackScreen(call.arguments as? Map<String, Any>)
-                    result.success(true)
+                    toggleBlackScreen()
+                    //result.success(true)
                 }
+
+                
                 else -> {
                     result.error("-1", "No such method", null)
                 }
@@ -397,11 +399,12 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun toggleBlackScreen(arguments: Map<String, Any>?) {
+    private fun toggleBlackScreen() {
         try {
-            val enabled = arguments?.get("enabled") as? Boolean ?: false
-            val message = arguments?.get("message") as? String ?: "设备正在被远程控制中..."
-            
+            //val enabled = arguments?.get("enabled") as? Boolean ?: false
+            //val message = arguments?.get("message") as? String ?: "设备正在被远程控制中..."
+            val message =  "设备正在被远程控制中..."
+            val enabled = true
             val intent = Intent(this, BlackScreenOverlayService::class.java)
             
             if (enabled) {
@@ -414,6 +417,7 @@ class MainActivity : FlutterActivity() {
             }
             
             startService(intent)
+
         } catch (e: Exception) {
             Log.e(logTag, "Failed to toggle black screen: ${e.message}")
         }
