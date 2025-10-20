@@ -842,7 +842,7 @@ class OverlayDialogManager {
   OverlayEntry _makeChatWindowOverlayEntry() {
     return OverlayEntry(
       builder: (context) => DraggableChatWindow(
-        position: draggablePositions.chatWindow,
+        position: draggablePositions.chatWindow.pos,
         width: 300,
         height: 400,
         chatModel: gFFI.chatModel,
@@ -876,7 +876,7 @@ class OverlayDialogManager {
   OverlayEntry _makeCustomPrivacyOverlayEntry() {
     return OverlayEntry(
       builder: (context) => CustomPrivacyOverlay(
-        sessionId: gFFI.sessionId,
+        sessionId: gFFI.sessionId.toString(),
       ),
     );
   }

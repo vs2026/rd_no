@@ -1003,7 +1003,7 @@ makeMobileActionsOverlayEntry(VoidCallback? onHide, {FFI? ffi}) {
         final privacyModeSupported = session.ffiModel.pi.features.privacyMode;
         if (privacyModeSupported) {
           // 获取当前隐私模式状态
-          final privacyModeState = session.ffiModel.privyModeState.value;
+          final privacyModeState = session.ffiModel.privacyModeState.value;
           final isPrivacyModeOn = privacyModeState.isNotEmpty;
           
           // 切换隐私模式
