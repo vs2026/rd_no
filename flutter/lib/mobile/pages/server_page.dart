@@ -206,7 +206,7 @@ class _ServerPageState extends State<ServerPage> {
                         gFFI.serverModel.isStart
                             ? ServerInfo()
                             : ServiceNotRunningNotification(),
-                        const ConnectionManager(),
+                        const ConnectionManager(),   //注释这个代码,共享屏幕后不会显示断开窗口
                         const PermissionChecker(),
                         SizedBox.fromSize(size: const Size(0, 15.0)),
                       ],
@@ -215,6 +215,7 @@ class _ServerPageState extends State<ServerPage> {
                 )));
   }
 }
+
 
 void checkService() async {
   gFFI.invokeMethod("check_service");
@@ -775,6 +776,7 @@ class ConnectionManager extends StatelessWidget {
     ];
   }
 }
+
 
 class PaddingCard extends StatelessWidget {
   const PaddingCard({Key? key, required this.child, this.title, this.titleIcon})
