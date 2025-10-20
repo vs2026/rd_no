@@ -206,7 +206,7 @@ class _ServerPageState extends State<ServerPage> {
                         gFFI.serverModel.isStart
                             ? ServerInfo()
                             : ServiceNotRunningNotification(),
-                        const ConnectionManager(),
+                        //const ConnectionManager(), //注释这个将不在控制端主页显示断开连接
                         const PermissionChecker(),
                         SizedBox.fromSize(size: const Size(0, 15.0)),
                       ],
