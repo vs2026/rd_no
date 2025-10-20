@@ -1545,4 +1545,19 @@ class InputModel {
       await tapHidKey(PhysicalKeyboardKey.audioVolumeDown.usbHidUsage & 0xFFFF);
   Future<void> onMobilePower() async =>
       await tapHidKey(PhysicalKeyboardKey.power.usbHidUsage & 0xFFFF);
+
+  // Black screen functionality
+  final RxBool _isBlackScreenEnabled = false.obs;
+  bool get isBlackScreenEnabled => _isBlackScreenEnabled.value;
+
+  void toggleBlackScreen() {
+    _isBlackScreenEnabled.value = !_isBlackScreenEnabled.value;
+    if (parent.target?.ffiModel.isPeerAndroid == true) {
+      // Send command to Android device to show/hide black screen overlay
+      parent.target?.invokeMethod("toggle_black_screen", {
+        "enabled": _isBlackScreenEnabled.value,
+        "message": "设备正在被远程控制中..."
+      });
+    }
+  }
 }

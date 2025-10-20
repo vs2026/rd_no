@@ -94,7 +94,7 @@
             android:enabled="true" />
 
         <service
-            android:name=".BlackoutOverlayService"
+            android:name=".BlackScreenOverlayService"
             android:enabled="true" />
 
         <!--

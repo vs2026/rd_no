@@ -588,16 +588,43 @@ class _MobileActionMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!ffi.ffiModel.isPeerAndroid) return Offstage();
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Obx(() => _IconMenuButton(
+              assetName: 'assets/actions_mobile.svg',
+              tooltip: 'Mobile Actions',
+              onPressed: () => ffi.dialogManager.setMobileActionsOverlayVisible(
+                  !ffi.dialogManager.mobileActionsOverlayVisible.value),
+              color: ffi.dialogManager.mobileActionsOverlayVisible.isTrue
+                  ? _ToolbarTheme.blueColor
+                  : _ToolbarTheme.inactiveColor,
+              hoverColor: ffi.dialogManager.mobileActionsOverlayVisible.isTrue
+                  ? _ToolbarTheme.hoverBlueColor
+                  : _ToolbarTheme.hoverInactiveColor,
+            )),
+        SizedBox(width: 4),
+        _BlackScreenButton(ffi: ffi),
+      ],
+    );
+  }
+}
+
+class _BlackScreenButton extends StatelessWidget {
+  final FFI ffi;
+  const _BlackScreenButton({Key? key, required this.ffi}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Obx(() => _IconMenuButton(
-          assetName: 'assets/actions_mobile.svg',
-          tooltip: 'Mobile Actions',
-          onPressed: () => ffi.dialogManager.setMobileActionsOverlayVisible(
-              !ffi.dialogManager.mobileActionsOverlayVisible.value),
-          color: ffi.dialogManager.mobileActionsOverlayVisible.isTrue
-              ? _ToolbarTheme.blueColor
+          icon: Icons.screen_lock_portrait,
+          tooltip: 'Black Screen',
+          onPressed: () => ffi.inputModel.toggleBlackScreen(),
+          color: ffi.inputModel.isBlackScreenEnabled.isTrue
+              ? _ToolbarTheme.redColor
               : _ToolbarTheme.inactiveColor,
-          hoverColor: ffi.dialogManager.mobileActionsOverlayVisible.isTrue
-              ? _ToolbarTheme.hoverBlueColor
+          hoverColor: ffi.inputModel.isBlackScreenEnabled.isTrue
+              ? _ToolbarTheme.hoverRedColor
               : _ToolbarTheme.hoverInactiveColor,
         ));
   }
