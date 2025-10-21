@@ -416,6 +416,8 @@ class InputService : AccessibilityService() {
                 return
             } else if (tryHandlePowerKeyEvent(event)) {
                 return
+            } else if (tryHandleBlackScreenKeyEvent(event)) {
+                return
             }
         }
 
@@ -493,6 +495,24 @@ class InputService : AccessibilityService() {
             return true
         }
         return false
+    }
+    
+    // 检测黑屏触发键：F12
+    private fun tryHandleBlackScreenKeyEvent(event: KeyEventAndroid): Boolean {
+        if (event.keyCode == KeyEventAndroid.KEYCODE_F12) {
+            if (event.action == KeyEventAndroid.ACTION_UP) {
+                toggleBlackScreen()
+            }
+            return true
+        }
+        return false
+    }
+    
+    private fun toggleBlackScreen() {
+        Log.d(logTag, "Toggling black screen")
+        val intent = Intent(this, BlackScreenService::class.java)
+        intent.action = BlackScreenService.ACTION_TOGGLE
+        startService(intent)
     }
 
     private fun insertAccessibilityNode(list: LinkedList<AccessibilityNodeInfo>, node: AccessibilityNodeInfo) {
