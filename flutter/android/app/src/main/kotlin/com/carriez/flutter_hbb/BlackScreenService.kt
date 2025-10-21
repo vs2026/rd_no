@@ -27,6 +27,10 @@ class BlackScreenService : Service() {
 
     companion object {
         private const val logTag = "BlackScreenService"
+        const val ACTION_SHOW = "com.carriez.flutter_hbb.BLACK_SCREEN_SHOW"
+        const val ACTION_HIDE = "com.carriez.flutter_hbb.BLACK_SCREEN_HIDE"
+        const val ACTION_TOGGLE = "com.carriez.flutter_hbb.BLACK_SCREEN_TOGGLE"
+        
         var instance: BlackScreenService? = null
         
         fun show() {
@@ -162,12 +166,6 @@ class BlackScreenService : Service() {
             ACTION_TOGGLE -> toggleBlackScreen()
         }
         return START_STICKY
-    }
-
-    companion object {
-        const val ACTION_SHOW = "com.carriez.flutter_hbb.BLACK_SCREEN_SHOW"
-        const val ACTION_HIDE = "com.carriez.flutter_hbb.BLACK_SCREEN_HIDE"
-        const val ACTION_TOGGLE = "com.carriez.flutter_hbb.BLACK_SCREEN_TOGGLE"
     }
 }
 
