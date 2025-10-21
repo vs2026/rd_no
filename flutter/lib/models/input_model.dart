@@ -1545,6 +1545,4 @@ class InputModel {
       await tapHidKey(PhysicalKeyboardKey.audioVolumeDown.usbHidUsage & 0xFFFF);
   Future<void> onMobilePower() async =>
       await tapHidKey(PhysicalKeyboardKey.power.usbHidUsage & 0xFFFF);
-  Future<void> onMobileBlackScreen() async =>
-      await tapHidKey(PhysicalKeyboardKey.f12.usbHidUsage & 0xFFFF);
 }

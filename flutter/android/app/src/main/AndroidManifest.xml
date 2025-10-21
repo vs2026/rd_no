@@ -93,9 +93,7 @@
             android:name=".FloatingWindowService"
             android:enabled="true" />
 
-        <service
-            android:name=".BlackScreenService"
-            android:enabled="true" />
+
 
         <!--
  Don't delete the meta-data below.
