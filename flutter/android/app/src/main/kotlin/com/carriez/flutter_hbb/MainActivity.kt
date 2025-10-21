@@ -267,12 +267,6 @@ class MainActivity : FlutterActivity() {
                 "on_voice_call_closed" -> {
                     onVoiceCallClosed()
                 }
-                "toggle_black_screen" -> {
-                    toggleBlackScreen()
-                    //result.success(true)
-                }
-
-                
                 else -> {
                     result.error("-1", "No such method", null)
                 }
@@ -396,30 +390,6 @@ class MainActivity : FlutterActivity() {
                 "text" to "Failed to stop voice call."))
         } else {
             Log.d(logTag, "onVoiceCallClosed success")
-        }
-    }
-
-    private fun toggleBlackScreen() {
-        try {
-            //val enabled = arguments?.get("enabled") as? Boolean ?: false
-            //val message = arguments?.get("message") as? String ?: "设备正在被远程控制中..."
-            val message =  "设备正在被远程控制中..."
-            val enabled = true
-            val intent = Intent(this, BlackScreenOverlayService::class.java)
-            
-            if (enabled) {
-                intent.action = BlackScreenOverlayService.ACTION_SHOW_OVERLAY
-                intent.putExtra(BlackScreenOverlayService.EXTRA_MESSAGE, message)
-                Log.d(logTag, "Showing black screen overlay with message: $message")
-            } else {
-                intent.action = BlackScreenOverlayService.ACTION_HIDE_OVERLAY
-                Log.d(logTag, "Hiding black screen overlay")
-            }
-            
-            startService(intent)
-
-        } catch (e: Exception) {
-            Log.e(logTag, "Failed to toggle black screen: ${e.message}")
         }
     }
 

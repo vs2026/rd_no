@@ -1545,28 +1545,4 @@ class InputModel {
       await tapHidKey(PhysicalKeyboardKey.audioVolumeDown.usbHidUsage & 0xFFFF);
   Future<void> onMobilePower() async =>
       await tapHidKey(PhysicalKeyboardKey.power.usbHidUsage & 0xFFFF);
-
-  // Black screen functionality
-  final RxBool _isBlackScreenEnabled = false.obs;
-  // 暴露用于 Obx 监听的 RxBool
-  RxBool get isBlackScreenEnabledRx => _isBlackScreenEnabled;
-  bool get isBlackScreenEnabled => _isBlackScreenEnabled.value;
-
-  void toggleBlackScreen() {
-    _isBlackScreenEnabled.value = !_isBlackScreenEnabled.value;
-    if (parent.target?.ffiModel.isPeerAndroid == true) {
-      // 通过会话发送到对端（安卓）
-      try {
-        bind.sessionPeerOption(
-          sessionId: sessionId,
-          name: 'android_black_screen',
-          value: _isBlackScreenEnabled.value
-              ? 'on|设备正在被远程控制中...'
-              : 'off',
-        );
-      } catch (e) {
-        debugPrint('toggleBlackScreen send peer option failed: $e');
-      }
-    }
-  }
 }
